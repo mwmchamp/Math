@@ -23,6 +23,9 @@ build/
 *.DS_Store
 *.video.mp4
 
+# Terraform
+.terraform/
+
 # IDEs and Editors
 .vscode/
 .idea/
