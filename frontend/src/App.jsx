@@ -34,7 +34,7 @@ export default function App() {
   };
 
   return (
-    (generationsLeft <= 0) ?
+    (generationsLeft < 0) ?
       (<Post />)
       : 
     (
