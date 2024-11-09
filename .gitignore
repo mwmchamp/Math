@@ -21,6 +21,7 @@ build/
 *.env
 *.cache
 *.DS_Store
+*.video.mp4
 
 # IDEs and Editors
 .vscode/

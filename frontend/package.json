@@ -10,10 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "ethers": "^5.7.2",
     "lucide-react": "^0.456.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "shadcn-ui": "^0.9.3"
+    "shadcn-ui": "^0.9.3",
+    "verbwire": "^1.0.6",
+    "verbwire-wallet": "^0.1.0",
+    "wagmi": "^2.12.29"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
@@ -25,6 +29,7 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "gh-pages": "^6.2.0",
     "globals": "^15.11.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",

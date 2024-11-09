@@ -3,7 +3,12 @@ export default function VideoDisplay({ videoUrl }) {
     <div className="text-center">
       {videoUrl ? (
         <div className="space-y-4">
-          <video controls src={videoUrl} className="w-full max-w-xl mx-auto rounded-lg shadow-lg" />
+          <video
+            controls
+            src={videoUrl}
+            className="w-full max-w-xl mx-auto rounded-lg shadow-lg"
+            onError={(e) => console.error("Error loading video:", e)}
+          />
           <div className="flex justify-center space-x-4">
             <a href={videoUrl} download className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">Download</a>
             <button onClick={() => navigator.share({ url: videoUrl })} className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600">Share</button>

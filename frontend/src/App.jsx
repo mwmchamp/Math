@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import UploadForm from '../components/UploadForm';
-import Status from '../components/Status';
-import VideoDisplay from '../components/VideoDisplay';
+import UploadForm from './components/UploadForm';
+import Status from './components/Status';
+import VideoDisplay from './components/VideoDisplay';
 
 export default function App() {
   const [status, setStatus] = useState('');
@@ -14,9 +14,8 @@ export default function App() {
     formData.append('text', text);
 
     try {
-      const response = await fetch('/api/generate-video', {
-        method: 'POST',
-        body: formData,
+      const response = await fetch('http://127.0.0.1:5000/generate-video', {
+        method: 'GET',
       });
       const data = await response.json();
       setVideoUrl(data.videoUrl);
@@ -27,18 +26,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
-      <div className="max-w-4xl w-full space-y-8 bg-white shadow-lg rounded-lg p-8 text-gray-900">
-        <h1 className="text-3xl font-extrabold text-center text-indigo-700 mb-6">Math Video Generator</h1>
-        <p className="text-center text-gray-600 mb-4">Upload an image or enter math text to generate an AI-powered video.</p>
-        
-        {/* Upload Form */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
+      <div className="max-w-4xl w-full space-y-8 bg-gray-800 bg-opacity-75 shadow-xl rounded-lg p-8 text-white border border-indigo-500">
+        <h1 className="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-600 glow-md">Math Video Generator</h1>
+        <p className="text-center text-indigo-300 mb-4">Upload an image or enter math text to generate an AI-powered video.</p>
+
         <UploadForm onSubmit={handleSubmit} />
-
-        {/* Status Message */}
         <Status status={status} />
-
-        {/* Video Display */}
         {videoUrl && (
           <div className="mt-8">
             <VideoDisplay videoUrl={videoUrl} />
