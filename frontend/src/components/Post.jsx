@@ -8,18 +8,35 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
   const [blockExplorerLink, setBlockExplorerLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null); // State for the image upload
+  const [agreeToTerms, setAgreeToTerms] = useState(false); // State for the terms agreement checkbox
+
+  const handleImageChange = (e) => {
+    setSelectedImage(e.target.files[0]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!agreeToTerms) {
+      setError('Please agree to the terms and conditions.');
+      return;
+    }
     setIsSubmitting(true);
     setError('');
+
+    // Prepare FormData
+    const formData = new FormData();
+    formData.append('walletAddress', walletAddress);
+    if (selectedImage) {
+      formData.append('image', selectedImage);
+    }
 
     try {
       const response = await fetch('http://localhost:3000/api/mint', {
         method: 'POST',
-        body: JSON.stringify({ walletAddress }),
+        body: formData,
       });
-      
+
       const data = await response.json();
 
       if (data.response?.transaction_details) {
@@ -28,8 +45,8 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
         setTransactionHash(transaction_details.transactionHash || '');
         setBlockExplorerLink(transaction_details.blockExplorer || '');
         setTimeout(() => {
-        setGenerationsLeft(5)
-        })
+          setGenerationsLeft(5);
+        });
       } else if (data.error) {
         setError(data.error.message);
       }
@@ -41,27 +58,12 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
     }
   };
 
-  const checkTransactionDetails = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/transactionDetails', {
-        method: 'POST',
-        body: JSON.stringify({ transactionId }),
-      });
-      
-      const data = await response.json();
-      alert(data.message);
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to fetch transaction details');
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">
-            Sorry time to pay something <br></br>
+            Sorry time to pay something <br />
             <a href="https://verbwire.com" className="text-blue-600 hover:text-blue-800">
               Verbwire!
             </a>
@@ -70,10 +72,7 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label 
-              htmlFor="wallet-address" 
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="wallet-address" className="block text-sm font-medium text-gray-700">
               Destination Wallet
             </label>
             <input
@@ -83,13 +82,40 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
               value={walletAddress}
               onChange={(e) => setWalletAddress(e.target.value)}
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={true}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="image-upload" className="block text-sm font-medium text-gray-700">
+              Upload Image
+            </label>
+            <input
+              id="image-upload"
+              type="file"
+              onChange={handleImageChange}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={isSubmitting}
             />
           </div>
 
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="agree-to-terms"
+              checked={agreeToTerms}
+              onChange={() => setAgreeToTerms(!agreeToTerms)}
+              className="mr-2"
+              disabled={isSubmitting}
+            />
+            <label htmlFor="agree-to-terms" className="text-sm text-gray-700">
+              I agree to provide my image to the site hoster, and they can use the image to create the NFT for themself. And, I dont own any rights for that.
+            </label>
+          </div>
+
           <button
             type="submit"
-            disabled={isSubmitting || !walletAddress}
+            disabled={isSubmitting || !walletAddress || !agreeToTerms || !selectedImage}
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
@@ -112,48 +138,7 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
           </div>
         )}
 
-        {transactionId && (
-          <div className="mt-6 space-y-4">
-            <div className="space-y-2">
-              <h3 className="font-semibold text-gray-700">Verbwire Transaction ID:</h3>
-              <p className="break-all bg-gray-50 p-2 rounded border border-gray-200">
-                {transactionId}
-              </p>
-            </div>
-
-            {transactionHash && (
-              <div className="space-y-2">
-                <h3 className="font-semibold text-gray-700">Blockchain Transaction Hash:</h3>
-                <p className="break-all bg-gray-50 p-2 rounded border border-gray-200">
-                  {transactionHash}
-                </p>
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              {blockExplorerLink && (
-                <a
-                  href={blockExplorerLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1"
-                >
-                  <button className="w-full flex items-center justify-center py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View in Explorer
-                  </button>
-                </a>
-              )}
-              
-              <button
-                onClick={checkTransactionDetails}
-                className="flex-1 py-2 px-4 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-              >
-                Transaction Details
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Transaction details section */}
       </div>
     </div>
   );

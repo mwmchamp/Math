@@ -22,7 +22,8 @@ export default function App() {
 
     try {
       const response = await fetch('http://127.0.0.1:5000/generate-video', {
-        method: 'GET',
+        method: 'POST',
+        body: formData
       });
       const data = await response.json();
       setVideoUrl(data.videoUrl);
@@ -30,6 +31,7 @@ export default function App() {
       setGenerationsLeft(prev => prev - 1);
     } catch (error) {
       setStatus('Error generating video. Please try again.');
+      console.error('Error:', error);
     }
   };
 
