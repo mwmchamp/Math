@@ -35,7 +35,7 @@ export default function App() {
 
   return (
     (generationsLeft < 0) ?
-      (<Post />)
+      (<Post generationsLeft={generationsLeft} setGenerationsLeft={setGenerationsLeft} />)
       : 
     (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8">

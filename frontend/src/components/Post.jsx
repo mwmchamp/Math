@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 
-const NFTMinter = () => {
+const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
   const [walletAddress, setWalletAddress] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const [transactionHash, setTransactionHash] = useState('');
@@ -27,6 +27,9 @@ const NFTMinter = () => {
         setTransactionId(transaction_details.transactionID || '');
         setTransactionHash(transaction_details.transactionHash || '');
         setBlockExplorerLink(transaction_details.blockExplorer || '');
+        setTimeout(() => {
+        setGenerationsLeft(5)
+        })
       } else if (data.error) {
         setError(data.error.message);
       }
