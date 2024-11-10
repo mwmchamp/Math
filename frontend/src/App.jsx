@@ -21,7 +21,7 @@ export default function App() {
     formData.append('text', text);
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/generate-video', {
+      const response = await fetch('https://crystalmath.pythonanywhere.com/generate-video', {
         method: 'POST',
         body: formData
       });
