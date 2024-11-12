@@ -10,8 +10,10 @@ export default function App() {
   const [generationsLeft, setGenerationsLeft] = useState(2);
 
   const handleSubmit = async ({ image, text }) => {
-    if (generationsLeft < 0) {
+    setVideoUrl('')
+    if (generationsLeft <= 0) {
       setStatus('Generation limit reached.');
+      setGenerationsLeft(-1)
       return;
     }
 
@@ -21,7 +23,7 @@ export default function App() {
     formData.append('text', text);
 
     try {
-      const response = await fetch('https://crystalmath.pythonanywhere.com/generate-video', {
+      const response = await fetch('http://localhost:5000/generate-video', {
         method: 'POST',
         body: formData
       });
@@ -36,30 +38,90 @@ export default function App() {
   };
 
   return (
-    (generationsLeft < 0) ?
-      (<Post generationsLeft={generationsLeft} setGenerationsLeft={setGenerationsLeft} />)
-      : 
-    (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 text-white flex items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
-      <div className="max-w-4xl w-full space-y-8 bg-gray-800 bg-opacity-75 shadow-xl rounded-lg p-8 text-white border border-indigo-500 relative">
-        <h1 className="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-600 glow-md">CrystalMath</h1>
-        <p className="text-center text-indigo-300 mb-4">Upload an image or enter math text to generate an AI-powered video.</p>
-        
-        <div className="absolute top-4 right-4 text-sm font-semibold text-indigo-400">
-          Generations Left: {generationsLeft}
-        </div>
-
-        <UploadForm onSubmit={handleSubmit} />
-        <Status status={status} />
-        {videoUrl && (
-          <div className="mt-8">
-            <VideoDisplay videoUrl={videoUrl} />
+    generationsLeft < 0 ? (
+      <Post generationsLeft={generationsLeft} setGenerationsLeft={setGenerationsLeft} />
+    ) : (
+      <div className="min-h-screen bg-black text-white">
+        <nav className="fixed w-full top-0 z-50 bg-[#0a0a0a] border-b border-white/[0.06]">
+          <div className="max-w-5xl mx-auto px-6 h-12 flex items-center justify-between">
+            <span className="text-lg font-medium tracking-tight bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
+              ∇ CrystalMath ∇
+            </span>
+            <span className="text-sm text-zinc-500">
+              {generationsLeft} generations remaining
+            </span>
           </div>
-        )}
+        </nav>
 
+        <main className="pt-28 px-6 pb-16">
+          <div className="max-w-2xl mx-auto space-y-16">
+            <header className="text-center space-y-4">
+              <h1 className="text-6xl font-medium tracking-tight">
+                Crystal Math
+              </h1>
+              <p className="text-base text-zinc-500">
+                Generate AI-powered visualizations from mathematical concepts
+              </p>
+            </header>
+
+            <div className="bg-[#111111] rounded-xl p-8">
+              <UploadForm onSubmit={handleSubmit}>
+                <div className="space-y-6">
+                  {/* <div className="space-y-2">
+                    <label className="block text-sm text-zinc-400">Upload Image</label>
+                    <input 
+                      type="file"
+                      accept="image/*"
+                      className="w-full h-12 px-4 bg-[#0a0a0a] rounded-lg border border-white/[0.06] text-sm text-zinc-300 
+                      file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm 
+                      file:bg-white/[0.05] file:text-zinc-300 hover:file:bg-white/[0.08]"
+                    />
+                  </div> */}
+
+                  <div className="space-y-2">
+                    <label className="block text-sm text-zinc-400">Enter Math Text</label>
+                    <textarea 
+                      className="w-full h-32 px-4 py-3 bg-[#0a0a0a] rounded-lg border border-white/[0.06] 
+                      text-sm text-zinc-300 placeholder-zinc-600 resize-none focus:outline-none 
+                      focus:ring-1 focus:ring-white/[0.12]"
+                      placeholder="Try 'Integral from 0 to 1 of 5*x^2' or 'Double Integral from 0 to 1 and 0 to 1 of x^2 + y^2 dy dx'"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="w-full h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg 
+                    text-sm font-medium transition-all hover:opacity-90 focus:outline-none 
+                    focus:ring-2 focus:ring-purple-500/50"
+                  >
+                    Generate Video
+                  </button>
+                </div>
+              </UploadForm>
+
+              {status && (
+                <div className="mt-4 text-center text-sm text-zinc-500">
+                  {status}
+                </div>
+              )}
+            </div>
+
+            {videoUrl && (
+              <div className="bg-[#111111] rounded-xl p-8">
+                <VideoDisplay videoUrl={videoUrl} />
+              </div>
+            )}
+          </div>
+        </main>
+
+        <footer className="fixed bottom-0 w-full border-t border-white/[0.06] bg-[#0a0a0a]">
+          <div className="max-w-5xl mx-auto px-6 h-12 flex items-center justify-center">
+            <span className="text-xs text-zinc-500">
+              Powered by advanced AI technology
+            </span>
+          </div>
+        </footer>
       </div>
-    </div>
-
-      )
+    )
   );
 }

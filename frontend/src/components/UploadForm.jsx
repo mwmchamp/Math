@@ -15,14 +15,14 @@ export default function UploadForm({ onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
+      {/* <div>
         <label className="block text-sm font-medium text-indigo-300">Upload Image</label>
         <input
           type="file"
           onChange={handleImageChange}
           className="mt-1 p-2 block w-full bg-gray-900 text-indigo-200 border border-indigo-500 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent"
         />
-      </div>
+      </div> */}
 
       <div>
         <label className="block text-sm font-medium text-indigo-300">Enter Math Text</label>

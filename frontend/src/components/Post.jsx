@@ -27,14 +27,14 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
     // Prepare FormData
     const formData = new FormData();
     formData.append('walletAddress', walletAddress);
-    if (selectedImage) {
-      formData.append('image', selectedImage);
-    }
+    // if (selectedImage) {
+    //   formData.append('image', selectedImage);
+    // }
 
     try {
       const response = await fetch('http://localhost:3000/api/mint', {
         method: 'POST',
-        body: formData,
+        body: JSON.stringify({ walletAddress }),
       });
 
       const data = await response.json();
@@ -82,7 +82,7 @@ const NFTMinter = ({ generationsLeft, setGenerationsLeft }) => {
               value={walletAddress}
               onChange={(e) => setWalletAddress(e.target.value)}
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={true}
+              disabled={isSubmitting}
             />
           </div>
 
