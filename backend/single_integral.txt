@@ -1,0 +1,135 @@
+import numpy as np
+from manim import *
+from manim_voiceover import VoiceoverScene
+from manim_voiceover.services.gtts import GTTSService
+
+# change
+lower_bound = 0
+upper_bound = 2
+
+class MathAnimation(VoiceoverScene):
+    def construct(self):
+        self.set_speech_service(
+            GTTSService(
+                speaking_rate=1.5  # 50% faster than default
+            )
+        )
+
+        with self.voiceover(text="Let's visualize and solve the integral of x squared from 0 to 2.") as tracker:
+            # Title and equation
+            # change
+            title = MathTex(
+                f"\\int_{{{lower_bound}}}^{{{upper_bound}}} x^2 \\, dx",
+                font_size=36
+            ).to_edge(UP)
+            self.play(Write(title))
+
+            # Create axes
+            axes = Axes(
+                x_range=[0, 2.5, 0.5],
+                y_range=[0, 5, 1],
+                axis_config={"include_tip": True},
+                x_length=8,
+                y_length=6
+            ).shift(DOWN * 0.5)
+
+            # Add labels
+            labels = axes.get_axis_labels(x_label="x", y_label="y")
+            
+            # change
+            def func(x):
+                return x**2
+
+            graph = axes.plot(func, color=BLUE)
+            
+            # Create area
+            area = axes.get_area(
+                graph,
+                x_range=[lower_bound, upper_bound],
+                color=BLUE_D,
+                opacity=0.3
+            )
+
+            # Vertical lines for bounds
+            left_line = DashedLine(
+                start=axes.c2p(lower_bound, 0),
+                end=axes.c2p(lower_bound, func(lower_bound)),
+                color=YELLOW,
+                dash_length=0.1
+            )
+            right_line = DashedLine(
+                start=axes.c2p(upper_bound, 0),
+                end=axes.c2p(upper_bound, func(upper_bound)),
+                color=YELLOW,
+                dash_length=0.1
+            )
+
+            # Animations
+            self.play(Create(axes), Create(labels))
+            self.play(Create(graph))
+            self.play(Create(left_line), Create(right_line))
+
+            # Animated filling with moving vertical line
+            moving_line = DashedLine(
+                start=axes.c2p(0, 0),
+                end=axes.c2p(0, func(0)),
+                color=GREEN,
+                dash_length=0.1
+            )
+            self.add(moving_line)
+
+            # change
+            num_rectangles = 20
+            dt = (upper_bound - lower_bound) / num_rectangles
+            
+            for x in np.arange(lower_bound, upper_bound + dt, dt):
+                new_line = DashedLine(
+                    start=axes.c2p(x, 0),
+                    end=axes.c2p(x, func(x)),
+                    color=GREEN,
+                    dash_length=0.1
+                )
+                curr_area = axes.get_area(
+                    graph,
+                    x_range=[lower_bound, x],
+                    color=BLUE_D,
+                    opacity=0.3
+                )
+                self.play(
+                    Transform(moving_line, new_line),
+                    FadeIn(curr_area),
+                    rate_func=linear,
+                    run_time=0.1
+                )
+
+            self.wait()
+            
+            # Clear screen but keep title
+            to_remove = [mob for mob in self.mobjects if mob != title]
+            self.play(*[FadeOut(mob) for mob in to_remove])
+            
+        with self.voiceover(text="Now let's solve this integral step by step."):
+            # Move title to indicate the start of the solution
+            self.play(title.animate.to_edge(UP, buff=0.8))
+
+        
+        # Step by step solution with voiceover
+        # change
+        steps_vo = [
+            "The antiderivative of x squared is x cubed over 3.",
+            "We substitute our bounds.",
+            "And our final answer is eight thirds."
+        ]
+
+        steps = VGroup(
+            MathTex("= \\left[\\frac{x^3}{3}\\right]_{" + str(lower_bound) + "}^{" + str(upper_bound) + "}"),
+            MathTex(f"= \\frac{{{upper_bound}^3}}{{3}} - \\frac{{{lower_bound}^3}}{{3}}"),
+            MathTex("= \\frac{8}{3}")
+        ).arrange(DOWN, buff=0.5).scale(0.8).next_to(title, DOWN, buff=0.8)
+        
+        # Animate each step with voiceover
+        for step, vo_text in zip(steps, steps_vo):
+            with self.voiceover(text=vo_text):
+                self.play(Write(step))
+            
+        self.wait()

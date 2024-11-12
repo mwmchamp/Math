@@ -1,0 +1,52 @@
+from manim import *
+from manim_voiceover import VoiceoverScene
+from manim_voiceover.services.gtts import GTTSService
+
+# change
+x_min, x_max = -5, 5
+y_min, y_max = -3, 3
+step = 1
+
+class MathAnimation(VoiceoverScene):
+    def construct(self):
+        self.set_speech_service(
+            GTTSService(
+                speaking_rate=1.5
+            )
+        )
+
+        with self.voiceover(text="Let's plot a quadratic function."):
+            # Create axes
+            axes = Axes(
+                x_range=[x_min, x_max, step],
+                y_range=[y_min, y_max, step],
+                axis_config={"color": BLUE},
+                tips=True
+            )
+            
+            # Labels
+            labels = axes.get_axis_labels(x_label="x", y_label="y")
+            
+            self.play(Create(axes), Write(labels))
+
+        def func(x):
+            # change
+            return x**2
+            
+        with self.voiceover(text="Here's the graph of y equals x squared."):
+            # Create graph
+            graph = axes.plot(func, color=WHITE)
+            self.play(Create(graph))
+
+        with self.voiceover(text="Let's examine some key points on this parabola."):
+            # Add points of interest
+            points = VGroup()
+            point_coords = [(0,0), (1,1), (-1,1)]
+            for x,y in point_coords:
+                point = Dot(axes.c2p(x, y), color=YELLOW)
+                coord = MathTex(f"({x},{y})").next_to(point, UP)
+                points.add(VGroup(point, coord))
+            
+            self.play(Create(points))
+            
+        self.wait()

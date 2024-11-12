@@ -1,0 +1,95 @@
+import numpy as np
+from manim import *
+from manim_voiceover import VoiceoverScene
+from manim_voiceover.services.gtts import GTTSService
+
+# change
+x_min, x_max = -3, 3
+y_min, y_max = -3, 3
+z_min, z_max = -2, 2
+step = 1
+resolution = 16
+camera_phi = 75
+camera_theta = 30
+
+class MathAnimation(ThreeDScene, VoiceoverScene):
+    def construct(self):
+        self.set_speech_service(
+            GTTSService(
+                speaking_rate=1.5
+            )
+        )
+
+        with self.voiceover(text="Let's visualize a three-dimensional surface."):
+            # Configure camera
+            self.set_camera_orientation(
+                phi=camera_phi * DEGREES, 
+                theta=camera_theta * DEGREES
+            )
+            
+            # Create 3D axes
+            axes = ThreeDAxes(
+                x_range=[x_min, x_max, step],
+                y_range=[y_min, y_max, step],
+                z_range=[z_min, z_max, step]
+            )
+            
+            # Add axis labels with proper positioning
+            x_label = axes.get_x_axis_label(
+                Tex("x").scale(0.7),
+                edge=RIGHT,
+                direction=RIGHT
+            )
+            y_label = axes.get_y_axis_label(
+                Tex("y").scale(0.7),
+                edge=UP,
+                direction=UP
+            )
+            z_label = axes.get_z_axis_label(
+                Tex("z").scale(0.7),
+                edge=OUT,
+                direction=OUT,
+                rotation=0
+            )
+            
+            labels = VGroup(x_label, y_label, z_label)
+            self.add_fixed_in_frame_mobjects(labels)
+            
+            self.play(Create(axes), Write(labels))
+
+        def func(x, y):
+            # change
+            return np.sin(x) * np.cos(y)
+
+        with self.voiceover(text="Here's the surface defined by sine of x times cosine of y."):
+            surface = Surface(
+                lambda u, v: axes.c2p(u, v, func(u, v)),
+                u_range=[x_min, x_max],
+                v_range=[y_min, y_max],
+                resolution=(resolution, resolution),
+                checkerboard_colors=[BLUE_D, BLUE_E]
+            )
+            
+            self.play(Create(surface))
+
+        with self.voiceover(text="Let's rotate the surface to better understand its shape."):
+            self.begin_ambient_camera_rotation(rate=0.2)
+            self.wait(3)
+            self.stop_ambient_camera_rotation()
+
+        # Optional: Add key points or features
+        with self.voiceover(text="Notice the periodic nature of the surface."):
+            points = VGroup()
+            key_points = [
+                (0, 0, func(0,0)),
+                (np.pi/2, 0, func(np.pi/2,0)),
+                (0, np.pi/2, func(0,np.pi/2))
+            ]
+            
+            for x,y,z in key_points:
+                point = Dot3D(axes.c2p(x,y,z), color=YELLOW)
+                points.add(point)
+            
+            self.play(Create(points))
+            
+        self.wait()

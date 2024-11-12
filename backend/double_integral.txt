@@ -1,0 +1,117 @@
+import numpy as np
+from manim import *
+from manim_voiceover import VoiceoverScene
+from manim_voiceover.services.gtts import GTTSService
+
+# change
+radius = 1  # radius of circle
+resolution = 20  # grid resolution
+
+class MathAnimation(ThreeDScene, VoiceoverScene):
+    def construct(self):
+        self.set_speech_service(
+            GTTSService(
+                speaking_rate=1.5
+            )
+        )
+
+        # Function and domain parameters
+        def f(x, y):
+            return x**2 + y**2
+        
+        def in_domain(x, y):
+            return x**2 + y**2 <= radius**2
+
+        dx = dy = 2*radius/resolution
+        
+        with self.voiceover(text=f"Let's visualize and solve the double integral of x squared plus y squared over a circle of radius {radius}."):
+            # Title
+            title = MathTex(
+                r"\iint_D (x^2 + y^2) \, dA, \quad D: x^2 + y^2 \leq " + str(radius),
+                font_size=36
+            )
+            title.to_edge(UP)
+            self.add_fixed_in_frame_mobjects(title)
+
+        with self.voiceover(text="First, let's set up our coordinate system and draw the circular domain."):
+            # Set up camera
+            self.set_camera_orientation(
+                phi=60*DEGREES,
+                theta=45*DEGREES,
+                zoom=0.7
+            )
+
+            # Create axes
+            axes = ThreeDAxes(
+                x_range=[-radius-0.5, radius+0.5],
+                y_range=[-radius-0.5, radius+0.5],
+                z_range=[0, 2*radius+0.5],
+                x_length=6,
+                y_length=6,
+                z_length=4
+            )
+            self.add(axes)
+
+            # Create domain boundary (circle)
+            t = np.linspace(0, TAU, 100)
+            circle_points = [axes.c2p(radius*np.cos(t_), radius*np.sin(t_), 0) for t_ in t]
+            boundary = Polygon(
+                *circle_points,
+                color=YELLOW,
+                stroke_width=3,
+                fill_opacity=0
+            )
+            self.play(Create(boundary))
+
+        with self.voiceover(text="Now watch as we build up the volume by stacking vertical elements to help visualize the integrals."):
+            # Create and animate volume elements
+            volume_elements = VGroup()
+            for x in np.arange(-radius, radius+dx, dx):
+                for y in np.arange(-radius, radius+dy, dy):
+                    if in_domain(x, y):
+                        height = f(x, y)
+                        start = axes.c2p(x, y, 0)
+                        end = axes.c2p(x, y, height)
+                        line = Line(start=start, end=end, stroke_width=2, stroke_color=BLUE).set_opacity(0.3)
+                        
+                        points = [
+                            axes.c2p(x, y, height),
+                            axes.c2p(x+dx, y, f(x+dx,y)),
+                            axes.c2p(x+dx, y+dy, f(x+dx,y+dy)),
+                            axes.c2p(x, y+dy, f(x,y+dy))
+                        ]
+                        surface_element = Polygon(*points, stroke_width=1, stroke_color=BLUE_E, fill_color=BLUE, fill_opacity=0.5)
+                        volume_elements.add(line, surface_element)
+            
+            self.play(Create(volume_elements))
+            
+            # Rotate scene
+            self.begin_ambient_camera_rotation(rate=0.2)
+            self.wait(3)
+            self.stop_ambient_camera_rotation()
+
+        with self.voiceover(text="Now let's solve this double integral step by step."):
+            # Clear 3D scene but keep title
+            self.remove(axes, boundary, volume_elements)
+            self.play(title.animate.to_edge(UP, buff=0.8))
+
+        steps_vo = [
+            "The domain becomes r from 0 to 1, and theta from 0 to 2π.",
+            "Integrating with respect to r first...",
+            "Then with respect to theta...",
+            "Our final answer is π over 2."
+        ]
+
+        steps = VGroup(
+            MathTex(r"= \int_0^{2\pi} \int_0^1 r^3 \, dr \, d\theta"),
+            MathTex(r"= \int_0^{2\pi} \left[\frac{r^4}{4}\right]_0^1 \, d\theta"),
+            MathTex(r"= \int_0^{2\pi} \frac{1}{4} \, d\theta"),
+            MathTex(r"= \frac{2\pi}{4} = \frac{\pi}{2}")
+        ).arrange(DOWN, buff=0.5).scale(0.8).next_to(title, DOWN, buff=0.8)
+
+        for step, vo_text in zip(steps, steps_vo):
+            with self.voiceover(text=vo_text):
+                self.add_fixed_in_frame_mobjects(step)
+                self.play(Write(step))
+            
+        self.wait()

@@ -1,0 +1,72 @@
+from manim import *
+from manim_voiceover import VoiceoverScene
+from manim_voiceover.services.gtts import GTTSService
+
+# change
+x_min, x_max = -3, 3
+y_min, y_max = -2, 2
+
+class MathAnimation(VoiceoverScene):
+    def construct(self):
+        self.set_speech_service(
+            GTTSService(
+                speaking_rate=1.5
+            )
+        )
+
+        # Create centered axes
+        axes = Axes(
+            x_range=[x_min, x_max],
+            y_range=[y_min, y_max],
+            axis_config={"color": WHITE},
+            x_length=10,
+            y_length=6
+        )
+        
+        labels = axes.get_axis_labels(x_label="x", y_label="y")
+        
+        # Equations
+        eq1 = MathTex(r"f(x) = x^2").scale(1.2).to_edge(UP).set_color(BLUE)
+        eq2 = MathTex(r"f'(x) = 2x").scale(1.2).to_edge(UP).set_color(RED)
+        
+        # Functions
+        def f(x): return x**2
+        def df(x): return 2*x
+        
+        original = axes.plot(f, color=BLUE)
+        derivative = axes.plot(df, color=RED)
+        
+        # Key points
+        point = Dot(axes.c2p(0, f(0)), color=YELLOW)
+        
+        # Animation sequence with voiceover
+        with self.voiceover(text="Let's start with the function f of x equals x squared."):
+            self.play(Write(eq1))
+            self.play(Create(axes), Create(labels))
+            
+        with self.voiceover(text="Here's the graph of our quadratic function."):
+            self.play(Create(original))
+            
+        with self.voiceover(text="Notice the vertex at the origin."):
+            self.play(Create(point))
+            
+        with self.voiceover(text="Now watch as we find its derivative. The derivative function f prime of x equals two x."):
+            self.play(
+                Transform(eq1, eq2),
+                Transform(original.copy(), derivative)
+            )
+            
+        with self.voiceover(text="The blue curve shows our original function, and the red line represents its derivative."):
+            # Add legend
+            legend = VGroup(
+                Dot(color=BLUE),
+                Text("f(x)", color=BLUE),
+                Dot(color=RED),
+                Text("f'(x)", color=RED)
+            ).arrange(RIGHT, buff=0.2).scale(0.8).to_edge(DOWN)
+            
+            self.play(Create(legend))
+            
+        self.wait()
+derivative.txt
+3 KB
